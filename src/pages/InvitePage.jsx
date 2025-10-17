@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { eventData } from '../data/eventData.js';
+import { eventData } from '../ data/eventData.js';
 import Countdown from '../components/Countdown.jsx';
 import MapButton from '../components/MapButton.jsx';
 import Footer from '../components/Footer.jsx';

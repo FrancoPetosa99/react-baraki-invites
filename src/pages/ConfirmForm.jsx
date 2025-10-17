@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { eventData } from '../data/eventData.js';
+import { eventData } from '../ data/eventData.js';
 import Footer from '../components/Footer.jsx';
 
 const ConfirmForm = () => {
