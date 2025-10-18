@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import logo from '../assets/images/logo.png';
 
 const Footer = ({ salonName, salonPhone, salonEmail, salonWebsite }) => {
   return (
@@ -8,7 +7,7 @@ const Footer = ({ salonName, salonPhone, salonEmail, salonWebsite }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.4 }}
-      className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-8 mt-16"
+      className="bg-gradient-to-r from-[#081cb7] to-[#081cb7] text-white py-8"
     >
       <div className="container mx-auto px-4">
         <div className="text-center">

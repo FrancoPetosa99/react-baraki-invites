@@ -41,10 +41,10 @@ const Countdown = ({ targetDate, enabled = true }) => {
   if (!enabled) return null;
 
   const timeUnits = [
-    { label: 'Días', value: timeLeft.days, color: 'from-primary-500 to-primary-600', glow: 'shadow-purple-500/50' },
-    { label: 'Horas', value: timeLeft.hours, color: 'from-secondary-500 to-secondary-600', glow: 'shadow-yellow-500/50' },
-    { label: 'Minutos', value: timeLeft.minutes, color: 'from-accent-500 to-accent-600', glow: 'shadow-cyan-500/50' },
-    { label: 'Segundos', value: timeLeft.seconds, color: 'from-primary-400 to-primary-500', glow: 'shadow-purple-400/50' }
+    { label: 'Días', value: timeLeft.days, color: 'from-[#081cb7] to-[#ed0bf5]', glow: 'shadow-[#ed0bf5]/50' },
+    { label: 'Horas', value: timeLeft.hours, color: 'from-[#ed0bf5] to-[#081cb7]', glow: 'shadow-[#081cb7]/50' },
+    { label: 'Minutos', value: timeLeft.minutes, color: 'from-[#081cb7] to-[#ed0bf5]', glow: 'shadow-[#ed0bf5]/50' },
+    { label: 'Segundos', value: timeLeft.seconds, color: 'from-[#ed0bf5] to-[#081cb7]', glow: 'shadow-[#081cb7]/50' }
   ];
 
   return (
@@ -99,7 +99,7 @@ const Countdown = ({ targetDate, enabled = true }) => {
           transition={{ duration: 0.5 }}
           className="text-center mt-8"
         >
-          <div className="bg-gradient-to-r from-secondary-500 to-primary-500 text-white rounded-2xl p-6 shadow-lg">
+          <div className="bg-gradient-to-r from-[#081cb7] to-[#ed0bf5] text-white rounded-2xl p-6 shadow-lg">
             <h3 className="text-2xl font-bold mb-2">¡Es hoy!</h3>
             <p className="text-lg">¡La fiesta está a punto de comenzar!</p>
           </div>

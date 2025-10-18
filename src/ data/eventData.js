@@ -1,28 +1,23 @@
-// Configuración del evento - Datos dinámicos
 export const eventData = {
-  // Información del evento
   eventName: "¡Cumpleaños de Emma!",
   celebrantName: "Emma García",
-  eventDate: "2025-03-15", // Formato YYYY-MM-DD
+  eventDate: "2025-03-15",
   eventTime: "16:00",
   eventEndTime: "20:00",
   
-  // Ubicación
   venueName: "Salón de Fiestas Baraki",
   address: "Av. Principal 123, Ciudad, Provincia",
   googleMapsLink: "https://maps.google.com/?q=Av.+Principal+123,+Ciudad,+Provincia",
   
-  // Información del salón
   salonName: "Baraki Eventos",
   salonPhone: "+54 11 1234-5678",
   salonEmail: "info@baraki.com.ar",
   salonWebsite: "www.baraki.com.ar",
-  
-  // Configuración visual
+
   theme: {
-    primaryColor: "#7c3aed", // Púrpura del logo
-    secondaryColor: "#f59e0b", // Amarillo del logo
-    accentColor: "#06b6d4", // Turquesa del logo
+    primaryColor: "#081cb7ff",
+    secondaryColor: "#ed0bf5ff",
+    accentColor: "#06b6d4",
     backgroundColor: "#f3f0ff"
   },
   
