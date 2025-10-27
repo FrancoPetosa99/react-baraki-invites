@@ -2,138 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos personalizados para la aplicación */
 @layer base {
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f3f0ff 0%, #e9e5ff 50%, #d6ceff 100%);
-    min-height: 100vh;
+  * {
+    @apply border-gray-200;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Comic Neue', cursive;
+
+  body {
+    @apply bg-cream-50 text-gray-900 font-sans;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer components {
   .btn-primary {
-    background: linear-gradient(90deg, #081cb7 0%, #081cb7 100%);
-    color: #fff;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
-    box-shadow: 0 4px 14px 0 rgba(8,28,183,0.15);
-    transition: all 0.3s ease;
-  }
-  .btn-primary:hover {
-    box-shadow: 0 8px 24px 0 rgba(8,28,183,0.25);
-    transform: scale(1.05);
+    @apply bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl;
   }
 
   .btn-secondary {
-    background: linear-gradient(90deg, #ed0bf5 0%, #ed0bf5 100%);
-    color: #fff;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
-    box-shadow: 0 4px 14px 0 rgba(237,11,245,0.15);
-    transition: all 0.3s ease;
-  }
-  .btn-secondary:hover {
-    box-shadow: 0 8px 24px 0 rgba(237,11,245,0.25);
-    transform: scale(1.05);
+    @apply bg-secondary-100 hover:bg-secondary-200 text-secondary-800 px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl;
   }
 
-  .btn-accent {
-    @apply bg-gradient-to-r from-accent-500 to-accent-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out;
+  .btn-elegant {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1;
   }
-  
-  .card {
-    @apply bg-white rounded-2xl shadow-xl p-6 border border-gray-100;
+
+  .card-elegant {
+    @apply bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8;
   }
-  
-  .floating {
-    @apply animate-bounce-slow;
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent;
   }
-  
-  .pulse-glow {
-    @apply animate-pulse-slow;
+
+  .invitation-header {
+    @apply text-4xl md:text-6xl font-bold text-center mb-6;
   }
-  
-  .wiggle {
-    @apply animate-wiggle;
+
+  .invitation-subtitle {
+    @apply text-xl md:text-2xl text-gray-600 text-center mb-8;
   }
-  
-  .glow-effect {
-    @apply animate-glow;
+
+  .event-detail {
+    @apply flex items-center space-x-3 p-4 bg-white/50 rounded-xl backdrop-blur-sm;
   }
-  
-  .sparkle-effect {
-    @apply animate-sparkle;
-  }
-  
-  .float-effect {
+
+  .floating-element {
     @apply animate-float;
   }
-  
-  .logo-glow {
-    @apply shadow-lg;
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3), 0 0 40px rgba(124, 58, 237, 0.2);
+
+  .fade-in {
+    @apply animate-fade-in;
   }
-  
-  .logo-circular {
-    @apply rounded-full overflow-hidden;
-    border: 2px solid rgba(124, 58, 237, 0.2);
-  }
-  
-  .logo-circular-glow {
-    @apply logo-circular logo-glow glow-effect;
-  }
-  
-  .baraki-gradient {
-    background: linear-gradient(135deg, #081cb7 0%, #ed0bf5 100%);
-  }
-  
-  .baraki-text {
-    background: linear-gradient(135deg, #081cb7 0%, #ed0bf5 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .hero-background {
-    background-attachment: fixed;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-  }
-  
-  .hero-overlay {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
-  }
-  
-  .hero-content {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+
+  .slide-up {
+    @apply animate-slide-up;
   }
 }
 
-/* Utilidad para texto gradiente */
 @layer utilities {
-  .text-gradient {
-    background: linear-gradient(90deg, #081cb7 0%, #ed0bf5 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  .bg-pattern {
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(8,28,183,0.15) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(237,11,245,0.15) 0%, transparent 50%),
-      radial-gradient(circle at 50% 50%, rgba(8,28,183,0.10) 0%, transparent 50%),
-      radial-gradient(circle at 10% 90%, rgba(237,11,245,0.10) 0%, transparent 40%),
-      radial-gradient(circle at 90% 10%, rgba(8,28,183,0.10) 0%, transparent 40%);
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .backdrop-blur-strong {
+    backdrop-filter: blur(20px);
   }
 }
