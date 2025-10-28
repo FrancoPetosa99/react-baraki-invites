@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'; // Importar useCallback
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Calendar,
@@ -11,35 +11,42 @@ import {
   Gift,
   Loader2,
   CheckCircle,
-  AlertCircle, // Icono para error
-  RefreshCw // Icono para reintentar
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import apiClient from '../utils/apiClient';
-import { invitationsUrl } from '../config/endpoints';
+import { invitationsUrl, rsvpUrl } from '../config/endpoints';
 import NotFound from './NotFound';
 
-/**
- * Página principal de invitación virtual
- */
+
 const InvitationPage = () => {
   const { id } = useParams();
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Nuevo estado para errores
+  const [error, setError] = useState(null);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0
   });
-  const [formSubmitted, setFormSubmitted] = useState(true);
+
+  const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef(null);
 
-  // Función de fetch extraída con useCallback
+
+  const [formData, setFormData] = useState({
+    nombre: '',
+    apellido: '',
+    email: ''
+  });
+  const [submitError, setSubmitError] = useState(null);
+
+
   const fetchEventData = useCallback(async () => {
     setLoading(true);
-    setError(null); // Limpiar errores anteriores al reintentar
+    setError(null);
     try {
       const response = await apiClient.get(invitationsUrl(id));
       // Éxito 200 OK
@@ -64,7 +71,6 @@ const InvitationPage = () => {
   useEffect(() => {
     fetchEventData();
   }, [fetchEventData]);
-
 
   // Countdown timer
   useEffect(() => {
@@ -104,19 +110,60 @@ const InvitationPage = () => {
     }
   };
 
-  // Función para manejar el envío del formulario
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simular envío del formulario
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    setIsSubmitting(false);
-    setFormSubmitted(true);
+  // Maneja los cambios en los inputs del formulario
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // 1. Manejo de estado de carga
+  // --- FUNCIÓN ACTUALIZADA CON VALIDACIÓN ---
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitError(null); // Limpiar error anterior
+
+    // --- Validación de campos vacíos y espacios en blanco ---
+    const { nombre, apellido, email } = formData;
+    
+    if (nombre.trim() === '' || apellido.trim() === '' || email.trim() === '') {
+      setSubmitError('Todos los campos son obligatorios.');
+      return; // Detener el envío
+    }
+
+    // --- Validación básica de formato de email ---
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setSubmitError('Por favor, ingresa un formato de email válido.');
+      return; // Detener el envío
+    }
+    // --- Fin de la validación ---
+
+    setIsSubmitting(true);
+
+    try {
+      // Enviamos los datos normalizados (sin espacios extra)
+      const payload = {
+        nombre: nombre.trim(),
+        apellido: apellido.trim(),
+        email: email.trim()
+      };
+
+      // Llamada REAL a la API (que será mockeada por MockAdapter)
+      await apiClient.post(rsvpUrl(id), payload);
+
+      setFormSubmitted(true);
+      setFormData({ nombre: '', apellido: '', email: '' });
+
+    } catch (err) {
+      console.error('Error enviando RSVP:', err);
+      setSubmitError('No se pudo enviar la confirmación. Por favor, intenta de nuevo.');
+
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  // --- FIN DE LA FUNCIÓN ACTUALIZADA ---
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-cream-50 flex items-center justify-center">
@@ -140,7 +187,6 @@ const InvitationPage = () => {
     );
   }
 
-  // 2. Manejo de estado de error
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-cream-50 flex items-center justify-center px-4">
@@ -166,12 +212,10 @@ const InvitationPage = () => {
     );
   }
 
-  // 3. Manejo de estado 404 (Not Found)
   if (!eventData) {
     return <NotFound />;
   }
 
-  // 4. Estado de éxito (mostrar página)
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-cream-50">
       {/* Header con imagen de fondo */}
@@ -331,7 +375,7 @@ const InvitationPage = () => {
                   </h3>
                 </div>
 
-                <form onSubmit={handleFormSubmit} className="max-w-2xl mx-auto">
+                <form onSubmit={handleFormSubmit} className="max-w-2xl mx-auto" noValidate>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                       <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-2">
@@ -344,6 +388,8 @@ const InvitationPage = () => {
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                         placeholder="Tu nombre"
+                        value={formData.nombre}
+                        onChange={handleInputChange}
                       />
                     </div>
 
@@ -358,6 +404,8 @@ const InvitationPage = () => {
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                         placeholder="Tu apellido"
+                        value={formData.apellido}
+                        onChange={handleInputChange}
                       />
                     </div>
 
@@ -372,9 +420,19 @@ const InvitationPage = () => {
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
                         placeholder="tu@email.com"
+                        value={formData.email}
+                        onChange={handleInputChange}
                       />
                     </div>
                   </div>
+
+                  {/* Bloque de error (AQUÍ SE MOSTRARÁ LA VALIDACIÓN) */}
+                  {submitError && (
+                    <div className="text-center mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+                      <p>{submitError}</p>
+                    </div>
+                  )}
+
 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
                     <button
@@ -414,7 +472,10 @@ const InvitationPage = () => {
 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
                     <button
-                      onClick={() => setFormSubmitted(false)}
+                      onClick={() => {
+                        setFormSubmitted(false);
+                        setSubmitError(null); // Limpiar error al volver
+                      }}
                       className="btn-elegant transform hover:scale-105 transition-all duration-300 w-full"
                     >
                       Nueva asistencia
@@ -462,4 +523,3 @@ const InvitationPage = () => {
 };
 
 export default InvitationPage;
-
