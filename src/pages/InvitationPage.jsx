@@ -1,17 +1,22 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react'; // Importar useCallback
 import { useParams } from 'react-router-dom';
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Phone, 
-  Mail, 
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
   Star,
   Sparkles,
   Gift,
   Loader2,
-  CheckCircle
+  CheckCircle,
+  AlertCircle, // Icono para error
+  RefreshCw // Icono para reintentar
 } from 'lucide-react';
+import apiClient from '../utils/apiClient';
+import { invitationsUrl } from '../config/endpoints';
+import NotFound from './NotFound';
 
 /**
  * Página principal de invitación virtual
@@ -20,6 +25,7 @@ const InvitationPage = () => {
   const { id } = useParams();
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Nuevo estado para errores
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -30,58 +36,43 @@ const InvitationPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef(null);
 
-  // Simular carga de datos del evento
-  useEffect(() => {
-    const fetchEventData = async () => {
-      // Simular delay de carga
-      await new Promise(resolve => setTimeout(resolve, 4000));
-      
-      // Datos mock del evento
-      const mockEventData = {
-        id: id || '1',
-        title: 'Fiesta de Cumpleaños de María',
-        host: {
-          name: 'María González',
-          phone: '+54 9 11 1234-5678',
-          email: 'maria@email.com'
-        },
-        date: '2025-10-26',
-        time: '19:00',
-        timeEnd: '22:00',
-        venue: {
-          name: 'Baraki Event Hall',
-          address: 'Av. Corrientes 1234, Buenos Aires',
-          phone: '+54 9 11 9876-5432',
-          email: 'info@baraki.com',
-          description: 'El lugar perfecto para celebrar tus momentos especiales'
-        },
-        theme: 'Princesas Disney',
-        design: {
-          url: 'https://res.cloudinary.com/dw9e57leg/image/upload/v1744766947/baraki/WhatsApp_Image_2025-04-02_at_16.51.16_wmqcty.jpg',
-          name: 'Princesa'
-        },
-        guests: 25,
-        specialRequests: 'Traer disfraces de princesas',
-        rsvp: {
-          deadline: '2024-12-10',
-          phone: '+54 9 11 1234-5678',
-          email: 'maria@email.com'
-        }
-      };
-      
-      setEventData(mockEventData);
+  // Función de fetch extraída con useCallback
+  const fetchEventData = useCallback(async () => {
+    setLoading(true);
+    setError(null); // Limpiar errores anteriores al reintentar
+    try {
+      const response = await apiClient.get(invitationsUrl(id));
+      // Éxito 200 OK
+      setEventData(response.data);
+    } catch (err) {
+      // Manejo de errores
+      if (err.response && err.response.status === 404) {
+        // Manejo 404 Not Found
+        setEventData(null);
+      } else {
+        // Manejo de otros errores (red, 500, etc.)
+        console.error('Error cargando invitación:', err);
+        setError('No se pudo cargar la invitación. Por favor, intenta de nuevo.');
+        setEventData(null);
+      }
+    } finally {
       setLoading(false);
-    };
-
-    fetchEventData();
+    }
   }, [id]);
+
+  // Fetch event data al montar
+  useEffect(() => {
+    fetchEventData();
+  }, [fetchEventData]);
+
 
   // Countdown timer
   useEffect(() => {
     if (!eventData) return;
 
     const calculateTimeLeft = () => {
-      const eventDateTime = new Date(`${eventData.date}T${eventData.time}:00`);
+      // Asegurarse que la fecha tenga el timezone correcto (asumimos local)
+      const eventDateTime = new Date(eventData.date + 'T' + eventData.time);
       const now = new Date();
       const difference = eventDateTime.getTime() - now.getTime();
 
@@ -93,7 +84,6 @@ const InvitationPage = () => {
 
         setTimeLeft({ days, hours, minutes, seconds });
       } else {
-        console.log('Event has passed');
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     };
@@ -107,7 +97,7 @@ const InvitationPage = () => {
   // Función para hacer scroll al formulario
   const scrollToForm = () => {
     if (formRef.current) {
-      formRef.current.scrollIntoView({ 
+      formRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       });
@@ -118,14 +108,15 @@ const InvitationPage = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simular envío del formulario
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     setIsSubmitting(false);
     setFormSubmitted(true);
   };
 
+  // 1. Manejo de estado de carga
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-cream-50 flex items-center justify-center">
@@ -134,7 +125,7 @@ const InvitationPage = () => {
             {/* Spinner de fondo */}
             <div className="absolute inset-0 border-4 border-primary-200 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-            
+
             {/* Logo de Baraki en el centro */}
             <div className="absolute inset-0 flex items-center justify-center">
               <img
@@ -149,10 +140,38 @@ const InvitationPage = () => {
     );
   }
 
+  // 2. Manejo de estado de error
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-cream-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center card-elegant">
+          <div className="mb-4">
+            <AlertCircle className="w-12 h-12 text-red-600 mx-auto" />
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            Ocurrió un Error
+          </h2>
+          <p className="text-gray-600 mb-8">
+            {error}
+          </p>
+          <button
+            onClick={fetchEventData} // Botón de reintento
+            className="btn-primary flex items-center justify-center w-full sm:w-auto mx-auto"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Manejo de estado 404 (Not Found)
   if (!eventData) {
     return <NotFound />;
   }
 
+  // 4. Estado de éxito (mostrar página)
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-cream-50">
       {/* Header con imagen de fondo */}
@@ -163,6 +182,7 @@ const InvitationPage = () => {
             src={eventData.design.url}
             alt={eventData.design.name}
             className="w-full h-full object-cover"
+            onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/1920x1080/f0f4f7/6366f1?text=Evento'; }}
           />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
@@ -174,6 +194,7 @@ const InvitationPage = () => {
               src="/src/assets/baraki/logo.png"
               alt="Baraki Event Hall"
               className="h-16 w-auto"
+              onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/100x100/ffffff/6366f1?text=Logo'; }}
             />
           </div>
         </div>
@@ -186,7 +207,7 @@ const InvitationPage = () => {
             </h1>
 
             {/* Botón de acción */}
-            <button 
+            <button
               onClick={scrollToForm}
               className="btn-elegant transform hover:scale-105 transition-all duration-300"
             >
@@ -218,19 +239,19 @@ const InvitationPage = () => {
                   <Clock className="w-8 h-8 mr-3" />
                   ¡Falta poco!
                 </h2>
-                
+
                 {/* Información básica del evento */}
                 <div className="text-center mb-8">
                   <div className="flex items-center justify-center space-x-3 mb-4">
                     <Calendar className="w-5 h-5 text-primary-600" />
-                    <span className="font-medium text-lg">{new Date(eventData.date).toLocaleDateString('es-ES', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'numeric', 
-                      day: 'numeric' 
+                    <span className="font-medium text-lg">{new Date(eventData.date + 'T00:00:00').toLocaleDateString('es-ES', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long', // Cambiado a 'long' para más claridad
+                      day: 'numeric'
                     })}</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-center space-x-3 mb-6">
                     <Clock className="w-5 h-5 text-primary-600" />
                     <span className="font-medium text-lg">{eventData.time} - {eventData.timeEnd}</span>
@@ -245,21 +266,21 @@ const InvitationPage = () => {
                       <div className="text-sm opacity-90">Días</div>
                     </div>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="bg-gradient-to-br from-secondary-500 to-secondary-600 text-white rounded-xl p-4 shadow-lg">
                       <div className="text-3xl font-bold">{timeLeft.hours}</div>
                       <div className="text-sm opacity-90">Horas</div>
                     </div>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-4 shadow-lg">
                       <div className="text-3xl font-bold">{timeLeft.minutes}</div>
                       <div className="text-sm opacity-90">Minutos</div>
                     </div>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="bg-gradient-to-br from-cream-500 to-cream-600 text-white rounded-xl p-4 shadow-lg">
                       <div className="text-3xl font-bold">{timeLeft.seconds}</div>
@@ -276,26 +297,27 @@ const InvitationPage = () => {
                 src="/src/assets/baraki/logo.png"
                 alt="Baraki Event Hall"
                 className="h-32 w-auto mx-auto"
+                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/200x128/ffffff/6366f1?text=Baraki'; }}
               />
 
-              <div className="space-y-4">
+              <div className="space-y-4 mt-6">
                 <div className="flex items-center space-x-3 text-gray-800">
-                  <MapPin className="w-5 h-5 text-primary-600" />
+                  <MapPin className="w-5 h-5 text-primary-600 flex-shrink-0" />
                   <span>{eventData.venue.address}</span>
                 </div>
-                
+
                 <div className="flex items-center space-x-3 text-gray-800">
-                  <Phone className="w-5 h-5 text-primary-600" />
+                  <Phone className="w-5 h-5 text-primary-600 flex-shrink-0" />
                   <span>{eventData.venue.phone}</span>
                 </div>
-                
+
                 <div className="flex items-center space-x-3 text-gray-800">
-                  <Mail className="w-5 h-5 text-primary-600" />
+                  <Mail className="w-5 h-5 text-primary-600 flex-shrink-0" />
                   <span>{eventData.venue.email}</span>
                 </div>
               </div>
             </div>
-             
+
           </div>
 
           {/* Sección de Confirmación de Asistencia */}
@@ -308,7 +330,7 @@ const InvitationPage = () => {
                     ¡Confirma tu asistencia!
                   </h3>
                 </div>
-                
+
                 <form onSubmit={handleFormSubmit} className="max-w-2xl mx-auto">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
@@ -324,7 +346,7 @@ const InvitationPage = () => {
                         placeholder="Tu nombre"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 mb-2">
                         Apellido <span className="text-sm text-red-500">*</span>
@@ -338,8 +360,8 @@ const InvitationPage = () => {
                         placeholder="Tu apellido"
                       />
                     </div>
-                    
-                    <div>
+
+                    <div className="md:col-span-2">
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                         Email <span className="text-sm text-red-500">*</span>
                       </label>
@@ -353,17 +375,17 @@ const InvitationPage = () => {
                       />
                     </div>
                   </div>
-                    
+
                   <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
-                    <button 
-                      type="submit" 
-                      disabled={isSubmitting} 
-                      className="btn-elegant transform hover:scale-105 transition-all duration-300 w-full"
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="btn-elegant transform hover:scale-105 transition-all duration-300 w-full disabled:opacity-70 disabled:transform-none"
                     >
                       {isSubmitting ? <Loader2 className="w-5 h-5 mr-2 inline animate-spin" /> : 'Enviar'}
                     </button>
                   </div>
-                  
+
                   <p className="text-sm text-red-500 mt-4 text-center">
                     * Campos obligatorios
                   </p>
@@ -376,11 +398,11 @@ const InvitationPage = () => {
                   <div className="mb-6">
                     <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-4" />
                   </div>
-                  
+
                   <h3 className="text-3xl font-bold text-gradient mb-4">
                     ¡Confirmación exitosa!
                   </h3>
-                  
+
                   <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
                     <p className="text-green-800 font-medium mb-2">
                       📧 Te enviaremos un email de confirmación
@@ -389,9 +411,9 @@ const InvitationPage = () => {
                       Mantente atento a tu correo para recibir más detalles del evento
                     </p>
                   </div>
-                  
+
                   <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
-                    <button 
+                    <button
                       onClick={() => setFormSubmitted(false)}
                       className="btn-elegant transform hover:scale-105 transition-all duration-300 w-full"
                     >
@@ -422,7 +444,7 @@ const InvitationPage = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-700 pt-6">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-gray-400 text-sm mb-2 md:mb-0">
@@ -440,3 +462,4 @@ const InvitationPage = () => {
 };
 
 export default InvitationPage;
+
