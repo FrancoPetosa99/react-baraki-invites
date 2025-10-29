@@ -33,7 +33,7 @@ if (import.meta.env.DEV) {
         return [200, {
           id,
           title: `Fiesta de Cumpleaños (${id})`,
-          date: '2025-10-26',
+          date: '2025-10-25',
           time: '19:00',
           timeEnd: '22:00',
           venue: { 
