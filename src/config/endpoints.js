@@ -1,5 +1,5 @@
 const API = import.meta.env.VITE_API_URL;
 
-export const invitationsUrl = (id) => `${API}/invitations/${id}`;
+export const invitationsUrl = (id) => `${API}/api/events/${id}/invitations`;
 
-export const rsvpUrl = (id) => `${API}/invitations/${id}/rsvp`;
+export const rsvpUrl = (id) => `${API}/api/events/${id}/guest`;

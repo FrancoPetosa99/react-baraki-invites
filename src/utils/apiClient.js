@@ -15,42 +15,45 @@ const apiClient = axios.create({
 if (import.meta.env.DEV) {
   const mock = new MockAdapter(apiClient, { delayResponse: 800 });
 
-  mock.onGet(/\/invitations\/(.+)/).reply((config) => {
-  
-    const id = config.url.split('/').pop();
+  mock.onGet(/\/api\/events\/(.+)\/invitations/).reply((config) => {
+    
+    
+    const parts = config.url.split('/');
+    const id = parts[parts.length - 2]; 
 
     switch (id) {
       case '404':
-        // Simular un 404 Not Found
-        return [404, { message: 'Invitación no encontrada' }];
+        return [404, { success: false, message: 'Invitación no encontrada' }];
       
       case '500':
-        // Simular un 500 Internal Server Error
-        return [500, { message: 'Error interno del servidor' }];
+        return [500, { success: false, message: 'Error interno del servidor' }];
 
       default:
-        // Simular un 200 OK para cualquier otro ID
+        
         return [200, {
-          id,
-          title: `Fiesta de Cumpleaños (${id})`,
-          date: '2025-10-25',
-          time: '19:00',
-          timeEnd: '22:00',
-          venue: { 
-            address: 'Av. Corrientes 1234, Buenos Aires',
-            phone: '+54 11 4567-8901',
-            email: 'info@baraki.com'
-          },
-          design: { url: '/src/assets/baraki/logo.png', name: 'Baraki' },
-          rsvp: { deadline: '2024-12-10' },
+          success: true,
+          message: 'Invitación cargada',
+          data: {
+            invitation: {
+              title: `Fiesta de Cumpleaños (${id})`,
+              image_url: '/src/assets/baraki/logo.png'
+            },
+            event_details: {
+              host: { phone: '+54 11 4567-8901', email: 'info@baraki.com' },
+              date: '2025-11-25T00:00:00.000Z', // Fechas en formato ISO del back
+              start_time: '19:00',
+              end_time: '22:00',
+            }
+          }
         }];
     }
   });
 
-  mock.onPost(/\/invitations\/\d+\/rsvp/).reply(200, {
-    message: 'RSVP recibido correctamente ✅',
+  mock.onPost(/\/api\/events\/(.+)\/guest/).reply(201, {
+    success: true,
+    message: 'Guest added successfully',
+    data: { id: 'mock-event-id' }
   });
 }
 
 export default apiClient;
-
