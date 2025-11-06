@@ -31,8 +31,10 @@ const InvitationPage = () => {
       const response = await apiClient.get(invitationsUrl(id));
       const { invitation, event_details } = response.data.data;
 
+      console.log('Datos de invitación recibidos:', response.data.data);
+
       const mappedEventData = {
-        title: invitation.title,
+        title: invitation.invitation.title,
         date: event_details.date.split('T')[0],
         time: event_details.start_time,
         timeEnd: event_details.end_time,
@@ -42,8 +44,8 @@ const InvitationPage = () => {
           email: event_details.host.email,
         },
         design: {
-          url: invitation.image_url,
-          name: invitation.title
+          url: invitation.invitation.image_url,
+          name: invitation.invitation.title
         },
       };
 
