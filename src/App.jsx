@@ -10,7 +10,6 @@ function App() {
     <div className="App">
       <Routes>
         {/* Página principal de invitación */}
-        <Route path="/" element={<InvitationPage />} />
         <Route path="/invitation/:id" element={<InvitationPage />} />
         
         {/* Página 404 */}
