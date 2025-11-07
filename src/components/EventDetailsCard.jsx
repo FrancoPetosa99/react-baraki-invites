@@ -11,7 +11,7 @@ const EventDetailsCard = ({ venue }) => {
   return (
     <div className="card-elegant slide-up">
       <img
-        src="../public/logo.png"
+        src="/logo.png"
         alt="Baraki Event Hall"
         className="h-32 w-auto mx-auto"
         onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/200x128/ffffff/6366f1?text=Baraki'; }}
