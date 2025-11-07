@@ -10,7 +10,7 @@ function App() {
     <div className="App">
       <Routes>
         {/* Página principal de invitación */}
-        <Route path="/invitation/:id" element={<InvitationPage />} />
+        <Route path="/" element={<InvitationPage />} />
         
         {/* Página 404 */}
         <Route path="*" element={<NotFound />} />

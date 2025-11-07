@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import apiClient from '../utils/apiClient';
 import { invitationsUrl } from '../config/endpoints';
 
@@ -16,7 +16,9 @@ import Footer from '../components/Footer';
 import ErrorBanner from '../components/ErrorBanner';
 
 const InvitationPage = () => {
-  const { id } = useParams();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const id = params.get('event_id');
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -64,8 +66,15 @@ const InvitationPage = () => {
   }, [id]);
 
   useEffect(() => {
+    // If there's no id in the query params, skip the fetch and show NotFound
+    if (!id) {
+      setLoading(false);
+      setEventData(null);
+      return;
+    }
+
     fetchEventData();
-  }, [fetchEventData]);
+  }, [fetchEventData, id]);
 
   // Función para hacer scroll al formulario de confirmación
   const scrollToForm = () => {
