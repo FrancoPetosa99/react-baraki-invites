@@ -25,7 +25,7 @@ const EventHero = ({ title, design, onConfirmClick }) => {
       <div className="absolute top-6 right-6 z-10">
         <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
           <img
-            src="/src/assets/baraki/logo.png"
+            src="/src/assets/logo.png"
             alt="Baraki Event Hall"
             className="h-16 w-auto"
             onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/100x100/ffffff/6366f1?text=Logo'; }}

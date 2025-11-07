@@ -11,7 +11,7 @@ const PageLoader = () => {
           <div className="absolute inset-0 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
             <img 
-              src="/src/assets/baraki/logo.png" 
+              src="/src/assets/logo.png" 
               alt="Baraki Event Hall" 
               className="h-32 w-auto" 
               onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/128x128/ffffff/6366f1?text=Baraki'; }}
