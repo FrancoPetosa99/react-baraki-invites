@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Loader2, CheckCircle } from 'lucide-react';
+import ReactConfetti from 'react-confetti'; 
 import apiClient from '../utils/apiClient';
 import { rsvpUrl } from '../config/endpoints';
 import ErrorBanner from './ErrorBanner';
@@ -72,7 +73,10 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
     } catch (err) {
       console.error('Error enviando RSVP:', err);
       if (err.response && err.response.status) {
-        if (err.response.status === 409) {
+   
+        if (err.response.status === 401) {
+           setSubmitError('Error de autenticación. Contacta al administrador (esto es temporal).');
+        } else if (err.response.status === 409) {
           setSubmitError('Ya existe una confirmación de asistencia con este email. ¡Gracias por confirmar!');
         } else if (err.response.status === 400 && err.response.data.message) {
           setSubmitError(err.response.data.message);
@@ -89,6 +93,10 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
 
   return (
     <div ref={formRefProp} className="mt-16 card-elegant slide-up">
+      
+      {/* --- CONFETI --- */}
+      {formSubmitted && <ReactConfetti recycle={false} />}
+
       <div className="relative overflow-hidden">
         {/* Formulario */}
         {!formSubmitted ? (
@@ -190,8 +198,8 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
             <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-4" />
             <h3 className="text-3xl font-bold text-gradient mb-4">¡Confirmación exitosa!</h3>
             <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
-              <p className="text-green-800 font-medium mb-2">📧 Te enviaremos un email de confirmación</p>
-              <p className="text-green-700 text-sm">Mantente atento a tu correo para recibir más detalles del evento</p>
+              <p className="text-green-800 font-medium mb-2">¡Gracias por confirmar!</p>
+              <p className="text-green-700 text-sm">Los detalles del evento han sido guardados.</p>
             </div>
             <button
               onClick={() => {
