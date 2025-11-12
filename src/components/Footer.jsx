@@ -10,13 +10,19 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row md:justify-between items-center md:items-start gap-10 mb-10">
 
           {/* --- Columna BARAKI --- */}
+          {/* --- Columna BARAKI --- */}
           <div className="flex flex-col items-center md:items-start">
-            <img
-              src="/logo.png"
-              alt="Baraki Event Hall"
-              className="h-20 w-auto mb-4" 
-              onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/150x80/111827/6366f1?text=Baraki'; }}
-            />
+            
+            {/* Contenedor blanco y redondeado para el logo */}
+            <div className="bg-white rounded-full p-2 mb-4 shadow-md">
+              <img
+                src="/logo.png"
+                alt="Baraki Event Hall"
+                className="h-16 w-auto" 
+                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/100x100/ffffff/6366f1?text=Logo'; }}
+              />
+            </div>
+            
             <p className="text-gray-400 text-sm max-w-xs text-center md:text-left">
               El lugar perfecto para tus momentos inolvidables.
             </p>
