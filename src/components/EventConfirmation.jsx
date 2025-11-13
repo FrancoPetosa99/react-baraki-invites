@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2, CheckCircle } from 'lucide-react';
 import ReactConfetti from 'react-confetti';
 import apiClient from '../utils/apiClient';
@@ -11,9 +11,16 @@ import ErrorBanner from './ErrorBanner';
  * @param {Object} props
  * @param {string} props.eventId - El ID del evento para enviar el POST
  * @param {React.Ref} props.formRefProp - Ref pasado desde el padre para el scroll
+ * @param {string} props.eventDate - Fecha del evento (YYYY-MM-DD)
+ * @param {string} props.eventEndTime - Hora de finalización del evento (HH:MM:SS)
  */
 
-const EventConfirmation = ({ eventId, formRefProp }) => {
+const EventConfirmation = ({
+  eventId,
+  formRefProp,
+  eventDate,
+  eventEndTime,
+}) => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,6 +30,23 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
   });
   const [submitError, setSubmitError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+
+  const [isEventOver, setIsEventOver] = useState(false);
+
+  useEffect(() => {
+    if (eventDate && eventEndTime) {
+      const eventEndDateTimeString = `${eventDate}T${eventEndTime}`;
+      const eventEndDate = new Date(eventEndDateTimeString);
+      const now = new Date();
+
+      if (now > eventEndDate) {
+        setIsEventOver(true);
+        setSubmitError(
+          'Este evento ya ha finalizado. No es posible confirmar asistencia.'
+        );
+      }
+    }
+  }, [eventDate, eventEndTime]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,6 +63,14 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    if (isEventOver) {
+      setSubmitError(
+        'Este evento ya ha finalizado. No es posible confirmar asistencia.'
+      );
+      return;
+    }
+
     setSubmitError(null);
     const { nombre, apellido, email } = formData;
     const newErrors = {};
@@ -110,7 +142,7 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
           ${
             formSubmitted
               ? 'max-h-0 opacity-0 invisible'
-              : 'max-h-[1500px] opacity-100' 
+              : 'max-h-[1500px] opacity-100'
           }
         `}
       >
@@ -120,90 +152,101 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <label
-              htmlFor="nombre"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Nombre <span className="text-sm text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="nombre"
-              name="nombre"
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
-                fieldErrors.nombre
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:ring-primary-500'
-              }`}
-              placeholder="Tu nombre"
-              value={formData.nombre}
-              onChange={handleInputChange}
+        {isEventOver && (
+          <div className="mb-6">
+            <ErrorBanner
+              type="info"
+              message="Este evento ya ha finalizado. No es posible confirmar asistencia."
             />
-            {fieldErrors.nombre && (
-              <p className="text-sm text-red-500 mt-1">
-                {fieldErrors.nombre}
-              </p>
-            )}
           </div>
+        )}
 
-          <div>
-            <label
-              htmlFor="apellido"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Apellido <span className="text-sm text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="apellido"
-              name="apellido"
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
-                fieldErrors.apellido
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:ring-primary-500'
-              }`}
-              placeholder="Tu apellido"
-              value={formData.apellido}
-              onChange={handleInputChange}
-            />
-            {fieldErrors.apellido && (
-              <p className="text-sm text-red-500 mt-1">
-                {fieldErrors.apellido}
-              </p>
-            )}
+        <fieldset disabled={isEventOver}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label
+                htmlFor="nombre"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Nombre <span className="text-sm text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                  fieldErrors.nombre
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:ring-primary-500'
+                }`}
+                placeholder="Tu nombre"
+                value={formData.nombre}
+                onChange={handleInputChange}
+              />
+              {fieldErrors.nombre && (
+                <p className="text-sm text-red-500 mt-1">
+                  {fieldErrors.nombre}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="apellido"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Apellido <span className="text-sm text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="apellido"
+                name="apellido"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                  fieldErrors.apellido
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:ring-primary-500'
+                }`}
+                placeholder="Tu apellido"
+                value={formData.apellido}
+                onChange={handleInputChange}
+              />
+              {fieldErrors.apellido && (
+                <p className="text-sm text-red-500 mt-1">
+                  {fieldErrors.apellido}
+                </p>
+              )}
+            </div>
+
+            <div className="md:col-span-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Email <span className="text-sm text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                  fieldErrors.email
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:ring-primary-500'
+                }`}
+                placeholder="tu@email.com"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+              {fieldErrors.email && (
+                <p className="text-sm text-red-500 mt-1">
+                  {fieldErrors.email}
+                </p>
+              )}
+            </div>
           </div>
+        </fieldset>
 
-          <div className="md:col-span-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Email <span className="text-sm text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 ${
-                fieldErrors.email
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:ring-primary-500'
-              }`}
-              placeholder="tu@email.com"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
-            {fieldErrors.email && (
-              <p className="text-sm text-red-500 mt-1">
-                {fieldErrors.email}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {submitError && (
+        {submitError && !isEventOver && (
           <ErrorBanner
             type="warning"
             message={submitError}
@@ -214,11 +257,13 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center w-full">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isEventOver}
             className="btn-elegant transform hover:scale-105 transition-all duration-300 w-full disabled:opacity-70 disabled:transform-none"
           >
             {isSubmitting ? (
               <Loader2 className="w-5 h-5 mr-2 inline animate-spin" />
+            ) : isEventOver ? (
+              'Evento finalizado'
             ) : (
               'Enviar'
             )}
@@ -235,8 +280,8 @@ const EventConfirmation = ({ eventId, formRefProp }) => {
           text-center py-12 transition-all duration-700 ease-in-out overflow-hidden
           ${
             formSubmitted
-              ? 'max-h-[1000px] opacity-100' 
-              : 'max-h-0 opacity-0 invisible' 
+              ? 'max-h-[1000px] opacity-100'
+              : 'max-h-0 opacity-0 invisible'
           }
         `}
       >

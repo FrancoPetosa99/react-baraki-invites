@@ -127,7 +127,12 @@ const InvitationPage = () => {
             <EventDetailsCard venue={eventData.venue} />
           </div>
 
-          <EventConfirmation eventId={id} formRefProp={formRef} />
+          <EventConfirmation
+            eventId={id}
+            formRefProp={formRef}
+            eventDate={eventData.date}
+            eventEndTime={eventData.timeEnd}
+          />
 
         </div>
         <div className="mt-16"></div>
